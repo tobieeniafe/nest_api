@@ -7,7 +7,11 @@ import { User } from './interfaces/user.interface';
 export class UserService {
 	constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
 
-	async registerUser(user: User): Promise<User>{
+	async registerUser(user: User): Promise<any>{
+		const already_registered = await this.userModel.findOne({email:user.email});
+		if (already_registered) {
+			return {status: false, message: 'email already in use'}
+		}
 		const newUser = new this.userModel(user);
 		return await newUser.save();
 	}
@@ -18,5 +22,9 @@ export class UserService {
 
 	async getUserById(id: string): Promise<User>{
 		return await this.userModel.findById(id);
+	}
+
+	async getUserByEmail(email: string): Promise<User>{
+		return await this.userModel.findOne({email:email});
 	}
 }
